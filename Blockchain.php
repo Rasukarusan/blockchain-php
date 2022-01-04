@@ -2,7 +2,7 @@
 
 class Blockchain
 {
-    private $chain;
+    public $chain;
 
     private $current_transactions;
 
@@ -10,6 +10,7 @@ class Blockchain
     {
         $this->chain = [];
         $this->current_transactions = [];
+        $this->newBlock(1, 100);
     }
 
     /**
@@ -25,13 +26,13 @@ class Blockchain
             'timestamp' => time(),
             'transactions' => $this->current_transactions,
             'proof' => $proof,
-            'previous_hash' => $this->createHash(self::lastBlock()),
+            'previous_hash' => $previous_hash ?? $this->createHash(self::lastBlock()),
         ];
 
         // トランザクションをリセット
         $this->current_transactions = [];
 
-        $this->chain[] = block;
+        $this->chain[] = $block;
         return $block;
     }
 
@@ -69,6 +70,27 @@ class Blockchain
     }
 
     /**
+     * ブロックのSHA-256ハッシュを生成.
+     *
+     * @param array $block
+     * @return string SHA-256ハッシュ
+     */
+    public static function createHash($block): string
+    {
+        $block_string = json_encode($block);
+        return hash('sha256', $block_string);
+    }
+
+    /**
+     * チェーンの最後のブロックを返す.
+     * @return array 最後のブロック
+     */
+    public function lastBlock(): array
+    {
+        return end($this->chain);
+    }
+
+    /**
      * プルーフのバリデーション.
      *
      * @param int $last_proof
@@ -80,26 +102,5 @@ class Blockchain
         $guess = "{$last_proof}{$proof}";
         $guess_hash = hash('sha256', $guess);
         return substr($guess_hash, -4) === '0000';
-    }
-
-    /**
-     * ブロックのSHA-256ハッシュを生成.
-     *
-     * @param array $block
-     * @return string SHA-256ハッシュ
-     */
-    private static function createHash($block): sring
-    {
-        $block_string = json_encode($block);
-        return hash('sha256', $block_string);
-    }
-
-    /**
-     * チェーンの最後のブロックを返す.
-     * @return array 最後のブロック
-     */
-    private static function lastBlock(): array
-    {
-        return end($this->chain);
     }
 }
