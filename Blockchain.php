@@ -87,7 +87,8 @@ class Blockchain
      */
     public function lastBlock(): array
     {
-        return end($this->chain);
+        var_dump($this->chain);
+        return $this->chain[count($this->chain) - 1];
     }
 
     /**
